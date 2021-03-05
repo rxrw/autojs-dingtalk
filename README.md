@@ -41,13 +41,16 @@
 
 不保证兼容性
 
-## 没了
-
-写代码不易，点个星星吧
 
 ## 捐赠
 
 既然这个项目可以省掉你上班那么着急打卡的时间，不如来让作者打个车上班吧呜呜呜
+
+要是想让我接着坐地铁的话，就点个星星吧
+
+![WechatIMG85](https://user-images.githubusercontent.com/9566402/110096812-4beb0200-7dd9-11eb-9ccc-a0e5ad49cbeb.jpeg)
+
+![WechatIMG86](https://user-images.githubusercontent.com/9566402/110096820-4d1c2f00-7dd9-11eb-8c52-5fc93e5f528a.jpeg)
 
 ## 开源协议 && 贡献
 
