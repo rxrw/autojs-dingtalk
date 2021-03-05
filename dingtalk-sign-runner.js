@@ -95,17 +95,17 @@ let $$init = {
         //打上班卡时间设置
         let date = getAvailableDate(new Date() - 86400 * 1000);
         str = date + " " + sbHour + ":" + sbMinute + ":" + sbSecond;
-        timee = Date.parse(str) + sbEarly * 1000 + randomNum() * 60 * 1000;
+        timee = Date.parse(str) - sbEarly * 1000 + randomNum() * 60 * 1000;
       }
       if (thisTime > xbTime) {
         //打下一次上班卡时间设置
         let date = getAvailableDate(new Date() - 0);
         str = date + " " + sbHour + ":" + sbMinute + ":" + sbSecond;
-        timee = Date.parse(str) + sbEarly * 1000 + randomNum() * 60 * 1000;
+        timee = Date.parse(str) - sbEarly * 1000 + randomNum() * 60 * 1000;
       }
       let timer = require("./modules/ext-timers.js")(runtime, this);
       let task = timer.addDisposableTask({
-        path: "dingtalk-runner.js",
+        path: "dingtalk-sign-runner.js",
         date: timee,
       });
       postMessage(
