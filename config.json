@@ -1,0 +1,15 @@
+{
+  "sbHour": 9,
+  "sbMinute": 0,
+  "sbSecond": 0,
+  "sbEarly": 1200,
+  "xbHour": 18,
+  "xbMinute": 0,
+  "xbSecond": 0,
+  "xbDelay": 1800,
+  "workTitle": "工作台",
+  "randomMin": -9,
+  "randomMax": 9,
+  "txApiKey": "",
+  "pushoverApiKey": ""
+}
