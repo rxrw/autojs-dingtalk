@@ -42,13 +42,12 @@ let $$init = {
     }
 
     function wakeUp() {
-      for (let i = 0; i < 100; i++) {
-        if (device.isScreenOn()) {
-          console.log("手机亮了");
-          break;
-        }
-        console.log("唤醒手机");
+      while (!device.isScreenOn()) {
+        toastLog("努力点亮手机");
+
         device.wakeUpIfNeeded();
+
+        sleep(1000)
 
         swipe(500, 2000, 500, 1000, 220);
       }
@@ -85,17 +84,17 @@ let $$init = {
     function setTimer() {
       let timee = "";
       let str = "";
-      if (thisTime > sbTime && thisTime < xbTime) {
+      if (thisTime < sbTime) {
+        //打当天上班卡时间设置
+        let date = getAvailableDate(new Date() - 86400 * 1000);
+        str = date + " " + sbHour + ":" + sbMinute + ":" + sbSecond;
+        timee = Date.parse(str) - sbEarly * 1000 + randomNum() * 60 * 1000;
+      }
+      if (thisTime < xbTime) {
         //打当天下班卡时间设置
         let date = getAvailableDate(new Date() - 86400 * 1000);
         str = date + " " + xbHour + ":" + xbMinute + ":" + xbSecond;
         timee = Date.parse(str) + xbDelay * 1000 + randomNum() * 60 * 1000;
-      }
-      if (thisTime < sbTime) {
-        //打上班卡时间设置
-        let date = getAvailableDate(new Date() - 86400 * 1000);
-        str = date + " " + sbHour + ":" + sbMinute + ":" + sbSecond;
-        timee = Date.parse(str) - sbEarly * 1000 + randomNum() * 60 * 1000;
       }
       if (thisTime > xbTime) {
         //打下一次上班卡时间设置
@@ -105,11 +104,11 @@ let $$init = {
       }
       let timer = require("./modules/ext-timers.js")(runtime, this);
       let task = timer.addDisposableTask({
-        path: "dingtalk-sign-runner.js",
+        path: "main.js",
         date: timee,
       });
       postMessage(
-        "已设置打卡定时：" +
+        "打卡完毕，已设置打卡定时：" +
           dateFormat("Y-mm-dd HH:MM:SS", new Date(timee)) +
           " 定时提醒"
       );
@@ -131,6 +130,10 @@ let $$init = {
     }
 
     function openDingtalk() {
+      if (currentPackage() == "com.alibaba.android.rimet") {
+        toastLog("当前在钉钉里");
+        return;
+      }
       let res = app.launchApp("钉钉");
       if (!res) {
         postMessage("没有找到可以打开的钉钉");
@@ -145,12 +148,16 @@ let $$init = {
         //可能不在主界面，重启钉钉
         console.log("钉钉不在主界面可能，重启钉钉");
         shutdownDingtalk();
-        fullChain();
-        return;
+
+        openDingtalk();
+
+        workBtn = text(menu).findOne(10000);
       }
       workBtn.parent().parent().click();
+      toastLog("进入工作台");
       textContains("打卡").waitFor();
       text("考勤打卡").findOne().click();
+      toastLog("进入打卡页");
     }
 
     //点击打卡
@@ -163,24 +170,46 @@ let $$init = {
           );
           return;
         } else if (text("更新打卡").exists()) {
-          postMessage("已经打过卡了，再见");
-        } else {
-          let text1 = "";
           if (bc == 1) {
-            text1 = "上班打卡";
-          } else if (bc == 2) {
-            text1 = "下班打卡";
-          } else {
-            postMessage("多余任务，无需打卡");
+            postMessage("已经打过卡了，再见");
             return;
-          }
-          text(text1).findOne().click();
-          result = text("打卡成功").findOne(5000);
-          if (result) {
-            postMessage(true);
           } else {
-            postMessage(false);
+            if (text("更新打卡").find().length > 1) {
+              postMessage("已经打过卡了，再见");
+              return;
+            }
           }
+        } else if (textContains("已打卡").exists()) {
+          if (bc == 1) {
+            postMessage("已经打过卡了，再见");
+            return;
+          } else {
+            if (text("更新打卡").find().length > 1) {
+              postMessage("已经打过卡了，再见");
+              return;
+            }
+          }
+        }
+        let text1 = "";
+        if (bc == 1) {
+          text1 = "上班打卡";
+        } else if (bc == 2) {
+          text1 = "下班打卡";
+        } else {
+          postMessage("多余任务，无需打卡");
+          return;
+        }
+        toastLog("当前类型是" + bc + ",点击按钮" + text1);
+        dcard = text(text1).findOne(10000);
+        if (!dcard) {
+          toastLog("没有找到按钮，可能是上班时间设置出错了吧。");
+          return;
+        }
+        result = dcard.findOne(5000);
+        if (result) {
+          postMessage(true);
+        } else {
+          postMessage(false);
         }
       }
     }
@@ -203,7 +232,7 @@ let $$init = {
         title = "打卡结果";
       }
 
-      toast(message);
+      toastLog(message);
 
       if (pushoverApiKey) {
         http.post("https://api.pushover.net/1/messages.json", {
@@ -272,7 +301,7 @@ let $$init = {
       console.log(is_sure);
       if (is_sure.enabled()) {
         click("结束");
-        textContains("确定").findOne()
+        textContains("确定").findOne();
         click("确定");
         log(app.getAppName(packageName) + "应用已被关闭");
         sleep(1000);
