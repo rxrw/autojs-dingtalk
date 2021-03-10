@@ -37,6 +37,9 @@ let $$init = {
 
     function fullChain() {
       openDingtalk();
+      if (fastSign()) {
+        return true;
+      }
       inKaoqin();
       signIn();
     }
@@ -47,7 +50,7 @@ let $$init = {
 
         device.wakeUpIfNeeded();
 
-        sleep(1000)
+        sleep(1000);
 
         swipe(500, 2000, 500, 1000, 220);
       }
@@ -134,10 +137,22 @@ let $$init = {
         toastLog("当前在钉钉里");
         return;
       }
+      toastLog("启动钉钉APPing");
       let res = app.launchApp("钉钉");
       if (!res) {
         postMessage("没有找到可以打开的钉钉");
       }
+    }
+
+    function fastSign() {
+      //等待10秒的极速打卡
+      let tt = textContains("极速打卡成功").findOne(10000);
+      if (tt) {
+        postMessage("极速打卡成功，哦耶");
+        return true;
+      }
+      toastLog("未检测到极速打卡界面，开始正常打卡");
+      return false;
     }
 
     //进入考勤页面
@@ -146,7 +161,7 @@ let $$init = {
       workBtn = text(menu).findOne(10000);
       if (!workBtn) {
         //可能不在主界面，重启钉钉
-        console.log("钉钉不在主界面可能，重启钉钉");
+        toastLog("钉钉不在主界面可能，重启钉钉");
         shutdownDingtalk();
 
         openDingtalk();
@@ -158,6 +173,7 @@ let $$init = {
       textContains("打卡").waitFor();
       text("考勤打卡").findOne().click();
       toastLog("进入打卡页");
+      sleep(3000);
     }
 
     //点击打卡
@@ -169,26 +185,12 @@ let $$init = {
             "当前处于外勤打卡或迟到打卡状态，已停止任务，请自己处理。"
           );
           return;
-        } else if (text("更新打卡").exists()) {
-          if (bc == 1) {
-            postMessage("已经打过卡了，再见");
-            return;
-          } else {
-            if (text("更新打卡").find().length > 1) {
-              postMessage("已经打过卡了，再见");
-              return;
-            }
-          }
-        } else if (textContains("已打卡").exists()) {
-          if (bc == 1) {
-            postMessage("已经打过卡了，再见");
-            return;
-          } else {
-            if (text("更新打卡").find().length > 1) {
-              postMessage("已经打过卡了，再见");
-              return;
-            }
-          }
+        } else if (b === 2 && text("更新打卡").exists()) {
+          postMessage("已经打过卡了，再见");
+          return;
+        } else if (bc == 1 && textContains("已打卡").exists()) {
+          postMessage("已经打过卡了，再见");
+          return;
         }
         let text1 = "";
         if (bc == 1) {
@@ -202,10 +204,10 @@ let $$init = {
         toastLog("当前类型是" + bc + ",点击按钮" + text1);
         dcard = text(text1).findOne(10000);
         if (!dcard) {
-          toastLog("没有找到按钮，可能是上班时间设置出错了吧。");
+          postMessage("没有找到打卡相关按钮，可能是时间设置出错了吧。");
           return;
         }
-        result = dcard.findOne(5000);
+        result = dcard.click();
         if (result) {
           postMessage(true);
         } else {
@@ -298,7 +300,7 @@ let $$init = {
       app.openAppSetting(packageName);
       text("钉钉").waitFor();
       let is_sure = textContains("结束").findOne();
-      console.log(is_sure);
+
       if (is_sure.enabled()) {
         click("结束");
         textContains("确定").findOne();
