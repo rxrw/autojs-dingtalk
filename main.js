@@ -185,7 +185,7 @@ let $$init = {
             "当前处于外勤打卡或迟到打卡状态，已停止任务，请自己处理。"
           );
           return;
-        } else if (b === 2 && text("更新打卡").exists()) {
+        } else if (bc === 2 && text("更新打卡").exists()) {
           postMessage("已经打过卡了，再见");
           return;
         } else if (bc == 1 && textContains("已打卡").exists()) {
