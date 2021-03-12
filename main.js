@@ -145,8 +145,9 @@ let $$init = {
     }
 
     function fastSign() {
-      //等待10秒的极速打卡
-      let tt = textContains("极速打卡成功").findOne(10000);
+      toastLog("等待20秒的极速打卡")
+      //等待20秒的极速打卡
+      let tt = textContains("极速打卡成功").findOne(20000);
       if (tt) {
         postMessage("极速打卡成功，哦耶");
         return true;
@@ -213,6 +214,8 @@ let $$init = {
         } else {
           postMessage(false);
         }
+      }else{
+        postMessage("未检测到能打的班次，取消打卡");
       }
     }
 
