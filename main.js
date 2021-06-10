@@ -147,7 +147,7 @@ let $$init = {
     function fastSign() {
       toastLog("等待20秒的极速打卡")
       //等待20秒的极速打卡
-      let tt = textContains("蓝牙打卡成功").findOne(20000);
+      let tt = textContains("查看打卡结果").findOne(20000);
       if (tt) {
         postMessage("极速打卡成功，哦耶");
         return true;
@@ -171,7 +171,7 @@ let $$init = {
       }
       workBtn.parent().parent().click();
       toastLog("进入工作台");
-      textContains("打卡").waitFor();
+      textContains("考勤打卡").waitFor();
       text("考勤打卡").findOne().click();
       toastLog("进入打卡页");
       sleep(3000);
