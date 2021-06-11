@@ -145,9 +145,10 @@ let $$init = {
     }
 
     function fastSign() {
-      toastLog("等待20秒的极速打卡")
-      //等待20秒的极速打卡
-      let tt = textContains("查看打卡结果").findOne(20000);
+      toastLog("等待10秒的极速打卡");
+      //等待10秒的极速打卡
+      sleep(5000);
+      let tt = textContains("查看打卡结果").findOne(5000);
       if (tt) {
         postMessage("极速打卡成功，哦耶");
         return true;
@@ -171,8 +172,12 @@ let $$init = {
       }
       workBtn.parent().parent().click();
       toastLog("进入工作台");
-      textContains("考勤打卡").waitFor();
-      text("考勤打卡").findOne().click();
+      dkBtn = text("考勤打卡").findOne(10000);
+      if (!dkBtn) {
+        postMessage("打开了控制台缺没有找到考勤打卡按钮");
+        return;
+      }
+      dkBtn.click();
       toastLog("进入打卡页");
       sleep(3000);
     }
@@ -214,7 +219,7 @@ let $$init = {
         } else {
           postMessage(false);
         }
-      }else{
+      } else {
         postMessage("未检测到能打的班次，取消打卡");
       }
     }
