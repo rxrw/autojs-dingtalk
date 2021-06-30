@@ -11,5 +11,6 @@
   "randomMin": -9,
   "randomMax": 9,
   "txApiKey": "",
-  "pushoverApiKey": ""
+  "pushoverApiKey": "",
+  "dingPassword": ""
 }

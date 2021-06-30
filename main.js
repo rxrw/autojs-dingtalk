@@ -17,6 +17,7 @@ let sbEarly = config.sbEarly;
 let xbDelay = config.xbDelay;
 let txApiKey = config.txApiKey;
 let pushoverApiKey = config.pushoverApiKey;
+let dingPassword = config.dingPassword;
 
 minNum = config.randomMin;
 maxNum = config.randomMax;
@@ -37,6 +38,9 @@ let $$init = {
 
     function fullChain() {
       openDingtalk();
+
+      loginDingtalk();
+
       if (fastSign()) {
         return true;
       }
@@ -79,6 +83,7 @@ let $$init = {
         bc = 0;
         console.log("不用打卡");
       }
+
       setTimer();
 
       return;
@@ -144,16 +149,43 @@ let $$init = {
       }
     }
 
+    function loginDingtalk() {
+      if (textContains("我的") && textContains("消息")) {
+        toastLog("钉钉已登录，跳过此环节");
+        return true;
+      }
+      toastLog("尝试登录钉钉");
+      let passwordInput = id("et_pwd_login").findOne(5000);
+      if (passwordInput) {
+        toastLog("找到密码输入框");
+        let res = passwordInput.setText(dingPassword);
+        if (!res) {
+          toastLog("输入失败");
+        }
+        let btn = id("btn_next").findOne(4000);
+        btn.click();
+        sleep(5000);
+      } else {
+        toastLog("寻找密码输入按钮");
+        let passwordLogin = textContains("密码登录").findOne(5000);
+        if (!passwordLogin) {
+          return false;
+        }
+        passwordLogin.click();
+        loginDingtalk();
+      }
+      return false;
+    }
+
     function fastSign() {
       toastLog("等待10秒的极速打卡");
       //等待10秒的极速打卡
-      sleep(5000);
-      let tt = textContains("查看打卡结果").findOne(5000);
+      let tt = textContains("查看打卡结果").findOnce(3000);
       if (tt) {
         postMessage("极速打卡成功，哦耶");
         return true;
       }
-      toastLog("未检测到极速打卡界面，开始正常打卡");
+      toastLog("未检测到极速打卡通知，开始正常打卡");
       return false;
     }
 
@@ -174,8 +206,7 @@ let $$init = {
       toastLog("进入工作台");
       dkBtn = text("考勤打卡").findOne(10000);
       if (!dkBtn) {
-        postMessage("打开了控制台缺没有找到考勤打卡按钮");
-        return;
+        postMessage("打开了控制台却没有找到考勤打卡按钮");
       }
       dkBtn.click();
       toastLog("进入打卡页");
