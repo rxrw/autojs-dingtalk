@@ -150,24 +150,26 @@ let $$init = {
     }
 
     function loginDingtalk() {
-      if (textContains("我的") && textContains("消息")) {
-        toastLog("钉钉已登录，跳过此环节");
+      sleep(2000);
+      if (!(textContains("登录").findOnce())) {
+        toastLog("钉钉已登录或登录成功，跳过此环节");
         return true;
       }
       toastLog("尝试登录钉钉");
-      let passwordInput = id("et_pwd_login").findOne(5000);
+      let passwordInput = id("et_pwd_login").findOne(1000);
       if (passwordInput) {
         toastLog("找到密码输入框");
         let res = passwordInput.setText(dingPassword);
         if (!res) {
           toastLog("输入失败");
         }
-        let btn = id("btn_next").findOne(4000);
+        let btn = id("btn_next").findOne(1000);
         btn.click();
-        sleep(5000);
+        sleep(3000);
+        loginDingtalk();
       } else {
         toastLog("寻找密码输入按钮");
-        let passwordLogin = textContains("密码登录").findOne(5000);
+        let passwordLogin = textContains("密码登录").findOne(1000);
         if (!passwordLogin) {
           return false;
         }
