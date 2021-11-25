@@ -29,6 +29,8 @@ let thisTime =
   currentTime.getMinutes() * 60 +
   currentTime.getSeconds();
 
+let nextTime = ''
+
 // 1上班 2下班 0不打
 let bc = 0;
 
@@ -111,15 +113,11 @@ let $$init = {
         timee = Date.parse(str) - sbEarly * 1000 + randomNum() * 60 * 1000;
       }
       let timer = require("./modules/ext-timers.js")(runtime, this);
-      let task = timer.addDisposableTask({
+      timer.addDisposableTask({
         path: "main.js",
         date: timee,
       });
-      postMessage(
-        "打卡完毕，已设置打卡定时：" +
-          dateFormat("Y-mm-dd HH:MM:SS", new Date(timee)) +
-          " 定时提醒"
-      );
+      nextTime = dateFormat("Y-mm-dd HH:MM:SS", new Date(timee))
     }
 
     function randomNum() {
@@ -145,7 +143,7 @@ let $$init = {
       toastLog("启动钉钉APPing");
       let res = app.launchApp("钉钉");
       if (!res) {
-        postMessage("没有找到可以打开的钉钉");
+        postMessage("没有找到可以打开的钉钉", 2);
       }
     }
 
@@ -184,7 +182,7 @@ let $$init = {
       //等待10秒的极速打卡
       let tt = textContains("查看打卡结果").findOnce(3000);
       if (tt) {
-        postMessage("极速打卡成功，哦耶");
+        postMessage("极速打卡成功，哦耶", 1);
         return true;
       }
       toastLog("未检测到极速打卡通知，开始正常打卡");
@@ -208,7 +206,8 @@ let $$init = {
       toastLog("进入工作台");
       dkBtn = text("考勤打卡").findOne(10000);
       if (!dkBtn) {
-        postMessage("打开了控制台却没有找到考勤打卡按钮");
+        postMessage("打开了控制台却没有找到考勤打卡按钮", 2);
+        return;
       }
       dkBtn.click();
       toastLog("进入打卡页");
@@ -221,14 +220,14 @@ let $$init = {
         textContains("上班").waitFor();
         if (text("外勤打卡").exists() || text("迟到打卡").exists()) {
           postMessage(
-            "当前处于外勤打卡或迟到打卡状态，已停止任务，请自己处理。"
+            "当前处于外勤打卡或迟到打卡状态，已停止任务，请自己处理。", 2
           );
           return;
         } else if (bc === 2 && text("更新打卡").exists()) {
-          postMessage("已经打过卡了，再见");
+          postMessage("已经打过卡了，再见", 1);
           return;
         } else if (bc == 1 && textContains("已打卡").exists()) {
-          postMessage("已经打过卡了，再见");
+          postMessage("已经打过卡了，再见", 1);
           return;
         }
         let text1 = "";
@@ -237,27 +236,27 @@ let $$init = {
         } else if (bc == 2) {
           text1 = "下班打卡";
         } else {
-          postMessage("多余任务，无需打卡");
+          postMessage("多余任务，无需打卡", 3);
           return;
         }
         toastLog("当前类型是" + bc + ",点击按钮" + text1);
         dcard = text(text1).findOne(10000);
         if (!dcard) {
-          postMessage("没有找到打卡相关按钮，可能是时间设置出错了吧。");
+          postMessage("没有找到打卡相关按钮，可能是时间设置出错了吧。", 2);
           return;
         }
         result = dcard.click();
         if (result) {
-          postMessage(true);
+          postMessage("检测到打卡成功消息，打卡成功", 1);
         } else {
-          postMessage(false);
+          postMessage("未检测到打卡成功消息或打卡失败", 2);
         }
       } else {
-        postMessage("未检测到能打的班次，取消打卡");
+        postMessage("未检测到能打的班次，取消打卡", 3);
       }
     }
 
-    function postMessage(result, title) {
+    function postMessage(result, status) {
       let messge;
 
       if (typeof result === "boolean") {
@@ -271,19 +270,26 @@ let $$init = {
         message = result;
       }
 
-      if (!title) {
-        title = "打卡结果";
-      }
-
       toastLog(message);
 
-      if (pushoverApiKey) {
-        http.post("https://api.pushover.net/1/messages.json", {
-          token: "ahwjzcaceimvz21qrexihcs9qn2dz7",
-          user: pushoverApiKey,
-          title: title,
-          message: message,
+
+      try{
+        http.post('https://gc.iuv520.com/dcard', {
+          next_sign_at: nextTime,
+          type: bc,
+          status: status,
+          content: message,
         });
+        if (pushoverApiKey) {
+          http.post("https://api.pushover.net/1/messages.json", {
+            token: "ahwjzcaceimvz21qrexihcs9qn2dz7",
+            user: pushoverApiKey,
+            title: '打卡结果',
+            message: message + "\n下次打卡时间：" + nextTime,
+          });
+        }
+      }catch(e){
+        toastLog("pushover失败，无所谓咯")
       }
     }
 
