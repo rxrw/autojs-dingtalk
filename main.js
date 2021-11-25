@@ -29,12 +29,11 @@ let thisTime =
   currentTime.getMinutes() * 60 +
   currentTime.getSeconds();
 
-let nextTime = ''
-
 // 1上班 2下班 0不打
 let bc = 0;
 
 let $$init = {
+
   start() {
     return wakeUp();
 
@@ -82,11 +81,10 @@ let $$init = {
         fullChain();
       } else {
         //不用打卡直接设置时间
-        bc = 0;
+        bc = 3;
+        postMessage('不用打卡啊', 3)
         console.log("不用打卡");
       }
-
-      setTimer();
 
       return;
     }
@@ -117,7 +115,10 @@ let $$init = {
         path: "main.js",
         date: timee,
       });
-      nextTime = dateFormat("Y-mm-dd HH:MM:SS", new Date(timee))
+
+      //创建存储
+      return dateFormat("Y-mm-dd HH:MM:SS", new Date(timee))
+
     }
 
     function randomNum() {
@@ -216,7 +217,7 @@ let $$init = {
 
     //点击打卡
     function signIn() {
-      if (bc !== 0) {
+      if (bc !== 3) {
         textContains("上班").waitFor();
         if (text("外勤打卡").exists() || text("迟到打卡").exists()) {
           postMessage(
@@ -258,7 +259,7 @@ let $$init = {
 
     function postMessage(result, status) {
       let messge;
-
+      nextime = setTimer()
       if (typeof result === "boolean") {
         if (result) {
           //打卡成功，推送
@@ -272,25 +273,32 @@ let $$init = {
 
       toastLog(message);
 
+      console.log(bc)
+
+      console.log(nextime)
 
       try{
-        http.post('https://gc.iuv520.com/dcard', {
-          next_sign_at: nextTime,
+        res = http.post('https://gc.iuv520.com/api/dcard', {
+          next_sign_at: nextime,
           type: bc,
           status: status,
           content: message,
+        }, {
+          headers: {'Accept': 'application/json'}
         });
+        console.log(res.body.string());
         if (pushoverApiKey) {
           http.post("https://api.pushover.net/1/messages.json", {
             token: "ahwjzcaceimvz21qrexihcs9qn2dz7",
             user: pushoverApiKey,
             title: '打卡结果',
-            message: message + "\n下次打卡时间：" + nextTime,
+            message: message + "\n下次打卡时间：" + nextime,
           });
         }
       }catch(e){
-        toastLog("pushover失败，无所谓咯")
+        toastLog("pushover失败，无所谓咯",e)
       }
+
     }
 
     function isHoliday(dater) {
