@@ -16,7 +16,8 @@ let menu = config.workTitle;
 let sbEarly = config.sbEarly;
 let xbDelay = config.xbDelay;
 let txApiKey = config.txApiKey;
-let pushoverApiKey = config.pushoverApiKey;
+let barkPusherKey = config.barkPusherKey;
+let barkPusherURL = config.barkPusherURL;
 let dingPassword = config.dingPassword;
 
 minNum = config.randomMin;
@@ -272,31 +273,27 @@ let $$init = {
       }
 
       toastLog(message);
-
-      console.log(bc)
-
-      console.log(nextime)
-
+      let date = dateFormat("Y-mm-dd", new Date());
+      let bb = "非打卡时间"
+      if(bc == 1) {
+        bb = "上班"
+      }else if(bc == 2) {
+        bb = "下班"
+      }
       try{
-        res = http.post('https://gc.iuv520.com/api/dcard', {
-          next_sign_at: nextime,
-          type: bc,
-          status: status,
-          content: message,
-        }, {
-          headers: {'Accept': 'application/json'}
-        });
-        console.log(res.body.string());
-        if (pushoverApiKey) {
-          http.post("https://api.pushover.net/1/messages.json", {
-            token: "ahwjzcaceimvz21qrexihcs9qn2dz7",
-            user: pushoverApiKey,
-            title: '打卡结果',
-            message: message + "\n下次打卡时间：" + nextime,
+        if (barkPusherKey && barkPusherURL) {
+          http.post(barkPusherURL + "/push", {
+            device_key: barkPusherKey,
+            title: date + ' ' + bb + ' 打卡结果',
+            body: message + "\n下次时间：" + nextime,
+            ext_params: {
+              group: "打卡"
+            },
+            category: "AutoJS",
           });
         }
       }catch(e){
-        toastLog("pushover失败，无所谓咯",e)
+        toastLog("pushover失败，无所谓咯", e)
       }
 
     }

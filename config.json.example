@@ -11,6 +11,7 @@
   "randomMin": -9,
   "randomMax": 9,
   "txApiKey": "",
-  "pushoverApiKey": "",
+  "barkPusherKey": "",
+  "barkPusherURL": "",
   "dingPassword": ""
 }
