@@ -23,8 +23,8 @@ let dingPassword = config.dingPassword;
 minNum = config.randomMin;
 maxNum = config.randomMax;
 
-let sbTime = sbHour * 3600 + sbMinute * 60 + sbSecond * 60;
-let xbTime = xbHour * 3600 + xbMinute * 3600 + xbSecond * 3600;
+let sbTime = sbHour * 3600 + sbMinute * 60 + sbSecond;
+let xbTime = xbHour * 3600 + xbMinute * 60 + xbSecond;
 let thisTime =
   currentTime.getHours() * 60 * 60 +
   currentTime.getMinutes() * 60 +
