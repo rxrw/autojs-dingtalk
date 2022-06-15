@@ -1,6 +1,6 @@
----
-lastmod: '2022-01-13T01:19:42.058Z'
----
+不要做这种违反企业规章制度的事情了。。
+
+
 
 # 基于 Auto.js 的钉钉自动化打卡脚本
 
@@ -47,16 +47,6 @@ lastmod: '2022-01-13T01:19:42.058Z'
 毕竟其他手机没做过实验
 
 不保证兼容性
-
-## 捐赠
-
-既然这个项目可以省掉你上班那么着急打卡的时间，不如来让作者打个车上班吧呜呜呜
-
-要是想让我接着坐地铁的话，就点个星星吧
-
-![WechatIMG85](https://user-images.githubusercontent.com/9566402/110096812-4beb0200-7dd9-11eb-9ccc-a0e5ad49cbeb.jpeg)
-
-![WechatIMG86](https://user-images.githubusercontent.com/9566402/110096820-4d1c2f00-7dd9-11eb-8c52-5fc93e5f528a.jpeg)
 
 ## 开源协议 && 贡献
 
